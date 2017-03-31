@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<steps><step><id>STEP_1</id><page_id>PAGE_57</page_id><field_id>FIELD_1</field_id><operation>find</operation><not_use>false</not_use></step><step><id>STEP_2</id><page_id>PAGE_57</page_id><field_id>FIELD_2</field_id><operation>waitVanish</operation><not_use>false</not_use></step></steps>

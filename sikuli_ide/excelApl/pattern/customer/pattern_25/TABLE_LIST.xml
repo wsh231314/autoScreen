@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tables><table><id>TABLE_0</id><comment>受注</comment><number>5</number><name>M_SALES_ORDER_PART_NO</name></table><table><id>TABLE_1</id><comment>ルネ</comment><number>10</number><name>M_RENESAS_PART_NO</name></table></tables>

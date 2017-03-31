@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table><column key="false"><name>CONSIDERINGDAY_CHAR</name><type>VARCHAR2</type><length>8</length><precision></precision><scale></scale><nullable>Y</nullable></column><column key="false"><name>CONSIDERINGDAY</name><type>DATE</type><length>7</length><precision></precision><scale></scale><nullable>Y</nullable></column><column key="false"><name>UPDATE_DATE</name><type>TIMESTAMP(6)</type><length>11</length><precision></precision><scale>6</scale><nullable>Y</nullable></column></table>
