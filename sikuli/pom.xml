@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2010-2016, Sikuli.org, sikulix.com
+  ~ Released under the MIT License.
+  ~
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <!--
+  * Copyright 2010-2015, Sikuli.org, sikulix.com
+  * Released under the MIT License.
+  -->
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <!--  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>7</version>
+  </parent>-->
+
+  <groupId>com.sikulix</groupId>
+  <artifactId>sikulix1</artifactId>
+  <version>1.1.1</version>
+
+  <!-- to globally change the pom version:
+  mvn versions:set -DnewVersion=1.1.0
+  reminder: property sikuli.usedversion
+  -->
+
+  <packaging>pom</packaging>
+
+  <url>http://www.sikuli.org</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.sikulix.com/disclaimer/#license</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>RaiMan</id>
+      <name>Raimund Hocke</name>
+      <email>rmhdevelop@me.com</email>
+    </developer>
+  </developers>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <sikuli.jartype>plain.xml</sikuli.jartype>
+    <sikuli.jarname>${project.version}</sikuli.jarname>
+    <sikulixvmaj>1</sikulixvmaj>
+    <sikulixvmin>1</sikulixvmin>
+    <sikulixvsub>1</sikulixvsub>
+    <sikulixbeta>0</sikulixbeta>
+    <!--   this decides, where setup downloads from   -->
+    <!--<sikulixdev>release</sikulixdev>-->
+    <sikulixdev>development</sikulixdev>
+    <sikuli.usedversion>${sikulixvmaj}.${sikulixvmin}.${sikulixvsub}</sikuli.usedversion>
+    <sikuli.minorversion>${sikulixvmaj}.${sikulixvmin}.${sikulixvsub}</sikuli.minorversion>
+    <sikulixjythonversion>2.7.0</sikulixjythonversion>
+    <sikulixjrubyversion>9.0.1.0</sikulixjrubyversion>
+    <sikulixlocalrepo>${settings.localRepository}</sikulixlocalrepo>
+    <sikuli.helpers>Setup/src/main/resources/content</sikuli.helpers>
+    <timestamp>${maven.build.timestamp}</timestamp>
+    <maven.build.timestamp.format>yyyy-MM-dd_HH:mm</maven.build.timestamp.format>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>jitpack.io</id>
+      <url>https://jitpack.io</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <modules>
+    <module>Libslux</module>
+    <module>Libsmac</module>
+    <module>Libswin</module>
+    <module>API</module>
+    <module>SetupAPI</module>
+    <module>Jygments4SikuliX</module>
+    <module>IDE</module>
+    <module>SetupIDE</module>
+    <module>Setup</module>
+  </modules>
+
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <source>1.7</source>
+          <target>1.7</target>
+          <!--					might be needed for compiling with Java 8 -->
+          <compilerArgument>-XDignore.symbol.file=true</compilerArgument>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
