@@ -23,7 +23,11 @@ import java.math.BigDecimal;
 import java.security.*;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -31,13 +35,23 @@ import javax.swing.BorderFactory;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.app.co.jp.com.CommonConstant;
+import org.app.co.jp.com.UserException;
+import org.app.co.jp.dao.OperationDao;
+import org.app.co.jp.dao.OperationDataDao;
 import org.app.co.jp.util.bean.DefaultComboBoxModel;
 import org.app.co.jp.util.bean.SelectBean;
 
 /**
  */
 public abstract class Utils {
+	
+	static BasicLogger logger = BasicLogger.getLogger();
 
 	public static final String FLG_Y = "Y";
 
@@ -441,46 +455,81 @@ public abstract class Utils {
 	}
 	
 	/**
+	 * 
+	 * 
+	 * @param strFromFile
+	 * @param strToFile
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static void copyFile(String strFromFile, String strToFile) throws FileNotFoundException, IOException {
+
+		byte [] cache = new byte[1024];
+
+		try (FileInputStream input = new FileInputStream(new File(strFromFile))) {
+			try (FileOutputStream out = new FileOutputStream(new File(strToFile))) {
+				int i = 0;
+				while ((i = input.read(cache)) > 0) {
+					out.write(cache, 0, i);
+				}
+			}
+
+		}
+	}
+
+	/**
 	 * create 'try finally' function 
 	 * 
 	 * @param strPythonPath
 	 * @throws IOException 
 	 * @throws FileNotFoundException 
 	 */
-	public static String addOuterDealPython(String strPythonPath) throws FileNotFoundException, IOException {
+	public static String addOuterDealPython(String strPythonPath, String[] argv) throws FileNotFoundException, IOException {
 		// temp path
 		String tempPath = strPythonPath.substring(0, strPythonPath.lastIndexOf(".")).concat("temp").concat(".py");
-		
-		try (FileInputStream input = new FileInputStream(strPythonPath); BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
 
-			try (FileOutputStream out = new FileOutputStream(tempPath); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
-				// header
-				bw.write("try:");
-				bw.newLine();
-				bw.write("    initEvidence()");
-				bw.newLine();
-				
-				// content
-				String line = "";
-				while ((line = br.readLine()) != null) {
-					bw.write("    ".concat(line));
+		try {
+			try (FileInputStream input = new FileInputStream(strPythonPath); BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
+				try (FileOutputStream out = new FileOutputStream(tempPath); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
+					// header
+					bw.write("try:");
+					bw.newLine();
+					bw.write("    initEvidence()");
+					bw.newLine();
+
+					// content
+					String line = "";
+					while ((line = br.readLine()) != null) {
+						if (hasExtendOperation(line)) {
+							analysisCommand(line, argv, bw, strPythonPath);
+						} else {
+							bw.write("    ".concat(line));
+							bw.newLine();
+						}
+					}
+
+					// footer
+					bw.write("    popup('the end!')");
+					bw.newLine();
+					bw.write("except Exception, ex:");
+					bw.newLine();
+					bw.write("    popup('error!')");
+					bw.newLine();
+					bw.write("finally:");
+					bw.newLine();
+					bw.write("    endEvidence()");
 					bw.newLine();
 				}
-				
-				// footer
-				bw.write("    popup('the end!')");
-				bw.newLine();
-				bw.write("except Exception, ex:')");
-				bw.newLine();
-				bw.write("    popup('error!')");
-				bw.newLine();
-				bw.write("finally:");
-				bw.newLine();
-				bw.write("    endEvidence()");
-				bw.newLine();
+			}
+		} catch (Exception e) {
+			logger.exception(e);
+			Utils.deleteDirectory(tempPath);
+			
+			try (FileOutputStream out = new FileOutputStream(tempPath); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
+				bw.write("popup('" + e.getMessage() + "')");
 			}
 		}
-		
+
 		return tempPath;
 	}
 	
@@ -603,5 +652,324 @@ public abstract class Utils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+    
+    public static boolean isTextOperation(String strOperation) {
+    	
+    	if ("type".equals(strOperation) || "paste".equals(strOperation)) {
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    public static boolean hasExtendOperation(String strLine) {
+    	
+    	if (Utils.isEmpty(strLine)) {
+    		return false;
+    	}
+    	
+    	if (strLine.indexOf("executeOperationId") >= 0) {
+    		return true;
+    	}
+    	
+    	return false;
+    }
+    
+    public static void analysisCommand(String strLine , String[] argv, BufferedWriter bw, String strPythonPath) throws Exception {
+    	
+    	String evidencePath = "";
+    	
+    	if (argv != null && argv.length > 0) {
+    		evidencePath = argv[0];
+    	}
+    	
+    	int strLastPreBlankIndex = 0;
+    	
+    	for (int i = 0; i < strLine.length(); i++) {
+    		if (String.valueOf(strLine.charAt(i)).equals(" ")) {
+    			strLastPreBlankIndex = i + 1;
+    		} else {
+    			break;
+    		}
+    	}
+    	
+    	String strPreBlankString = "    ".concat(strLine.substring(0, strLastPreBlankIndex));
+    	
+    	String strOperationId = getOperationId(strLine);
+    	String strParameterExcelFile = getExcelFileName(strLine);
+    	
+    	boolean blnCheckBefore = checkOperationId(strOperationId);
+    	
+    	boolean blnInitFile = false;
+    	
+    	if (!blnCheckBefore) {
+    		throw new UserException("The operation definition has changed. please set it again!");
+    	}
+    	
+    	String strExcelPath = "";
+    	
+    	if (isEmpty(strParameterExcelFile)) {
+    		AutoOperationDataUtil dataUtil = new AutoOperationDataUtil();
+    		strExcelPath = dataUtil.createOperationData(strOperationId, evidencePath);
+    	} else {
+    		strExcelPath = strParameterExcelFile;
+    		blnInitFile = true;
+    	}
+   	
+    	List<Map<String, String>> operationDefinitionList = getOperationDefinitionData(strOperationId);
+    	
+    	CreateOperationScript(strOperationId, strPreBlankString, strExcelPath, operationDefinitionList, blnInitFile, bw, strPythonPath);
+    }
+    
+    /**
+     * extract the operation id from the command
+     * 
+     * @param strLine
+     * @return
+     * @throws UserException 
+     */
+    public static String getOperationId(String strLine) throws UserException {
+    	String strOperationID = "";
+    	strLine = strLine.replaceAll(" ", "");
+    	
+    	String [] divValue = strLine.split("'");
+    	if (divValue.length != 3 && divValue.length != 5) {
+    		throw new UserException("Operation's parameter is not right! :" + strLine);
+    	}
+    	
+    	strOperationID = strLine.substring(strLine.indexOf("\'") + 1, strLine.indexOf("\'", strLine.indexOf("\'") + 1));
+    	
+    	return strOperationID;
+    	
+    }
+    
+    /**
+     * extract the parameter excel path from the command
+     * 
+     * @param strLine
+     * @return
+     * @throws UserException 
+     */
+    public static String getExcelFileName(String strLine) throws UserException {
+    	String ExcelFileName = "";
+    	strLine = strLine.replaceAll(" ", "");
+    	
+    	String [] divValue = strLine.split("'");
+    	if (divValue.length != 3 && divValue.length != 5) {
+    		throw new UserException("Operation's parameter is not right! :" + strLine);
+    	}
+    	
+    	if (divValue.length == 5) {
+    		ExcelFileName = divValue[4];
+    	}
+    	
+    	return ExcelFileName;
+    }
+    
+    /**
+     * 
+     * 
+     * @param strOperationId
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+	private static boolean checkOperationId(String strOperationId) {
+    	
+    	OperationDao operationDao = new OperationDao();
+    	OperationDataDao operationDataDao = new OperationDataDao();
+    	
+    	List<Map<String, Object>> detailList= operationDao.searchAllInfoList(strOperationId);
+    	
+    	Set<String> baseKeySet = new HashSet<String>();
+    	String strScenarioId = "";
+    	
+    	List<Map<String, Set<String>>> checkKeySetList = new  ArrayList<Map<String, Set<String>>>();
+    	
+    	for (Map<String, Object> map : detailList) {
+    		Map<String, Map<String, String>> ruleMap = (Map<String, Map<String, String>>) map.get("DATA_RULES");
+    		String strDataId = String.valueOf(map.get("DATA_ID"));
+    		strScenarioId = String.valueOf(map.get("SCENARIO_ID"));
+    		
+    		Set<String> keySet = new HashSet<String>(ruleMap.keySet());
+    		
+    		Map<String, Set<String>> keyMap= new HashMap<String, Set<String>> ();
+    		
+    		keyMap.put(strDataId, keySet);
+    		
+    		checkKeySetList.add(keyMap);
+    	}
+    	
+    	try {
+			List<Map<String, String>> baseList = operationDataDao.getColumns(strScenarioId);
+			
+			for (Map<String, String> map : baseList) {
+				String strCode = strScenarioId.concat("-").concat(map.get("STEP_ID")).concat("-").concat(map.get("PAGE_ID")).concat("-").concat(map.get("FIELD_ID"));
+				baseKeySet.add(strCode);
+			}
+			
+			for (Map<String, Set<String>> dataMap : checkKeySetList) {
+				for (Set<String> checkSet : dataMap.values() ) {
+					if (!checkSet.containsAll(baseKeySet) || !baseKeySet.containsAll(checkSet)) {
+						return false;
+					};
+				}
+			}
+		} catch (Exception e) {
+			logger.exception(e);
+			e.printStackTrace();
+		}
+    	return true;
+    }
+    
+    /**
+     * 
+     * 
+     * @param strOperationId
+     * @return
+     * @throws Exception 
+     */
+	private static List<Map<String, String>> getOperationDefinitionData(String strOperationId) throws Exception {
+    	
+    	OperationDao operationDao = new OperationDao();
+    	
+    	return operationDao.getDefinitionInfoByOperationId(strOperationId);
+    }
+    
+    private static boolean CreateOperationScript(String strOperationId, String strPreBlankString, String strExcelPath, List<Map<String, String>> operationDefinitionList, boolean blnInitFile, BufferedWriter bw, String strPythonPath) throws Exception {
+    	
+    	int intLoop = 0;
+    	
+    	File inputFile = new File(strExcelPath);
+    	
+    	if (!inputFile.exists() || !inputFile.isFile()) {
+    		throw new UserException("The file is not exists:" + strExcelPath);
+    	}
+    	
+    	POIFSFileSystem poiFileSystem = new POIFSFileSystem( new FileInputStream(new File(strExcelPath)));
+    	
+    	HSSFWorkbook book = new HSSFWorkbook(poiFileSystem);
+    	
+    	HSSFSheet dataSheet = book.getSheetAt(0);
+    	int intLastRow = dataSheet.getLastRowNum();
+    	
+    	int intDataStartRow = 0;
+    	int intDataEndRow = 0;
+    	
+    	for (int i = 0; i <= intLastRow; i++) {
+    		
+    		String strFirstString = "";
+    		
+    		HSSFRow row = dataSheet.getRow(i);
+    		if (row != null) {
+    			HSSFCell cell = row.getCell(0);
+    			if (cell != null) {
+    				strFirstString = cell.getStringCellValue();
+    			}
+    		}
+    		
+    		if (strFirstString.indexOf("DATA_START") >= 0) {
+    			intDataStartRow = i;
+    		}
+    		
+    		if (strFirstString.indexOf("DATA_END") >= 0) {
+    			intDataEndRow = i;
+    			break;
+    		}
+    	}
+    	
+    	if (blnInitFile) {
+    		if (intDataStartRow == 0 || intDataEndRow == 0 || intDataStartRow > intDataEndRow) {
+    			throw new UserException("The file's format is not right:" + strExcelPath);
+    		}
+    	} else {
+    		if (intDataStartRow == 0 &&  intDataEndRow == 0) {
+    			OperationDao operationDao = new OperationDao();
+    			List<Map<String, Object>> result = operationDao.searchList(strOperationId);
+    			for (Map<String, Object> map : result) {
+    				String strNumber = (String)map.get("DATA_NUMBER");
+    				intLoop = intLoop + Integer.parseInt(strNumber);
+    			}
+    		}
+    	}
+    	
+    	intLoop = intDataEndRow - intDataStartRow + 1;
+    	
+    	bw.write(strPreBlankString.concat("import xlrd"));
+    	bw.newLine();
+    	bw.write(strPreBlankString.concat("data = xlrd.open_workbook('") + strExcelPath + "')");
+    	bw.newLine();
+    	bw.write(strPreBlankString.concat("sheet = data.sheets()[0]"));
+    	bw.newLine();
+    	
+    	bw.write(strPreBlankString.concat("intDataStartRow = " + String.valueOf(intDataStartRow)));
+    	bw.newLine();
+    	
+    	String strCommandLine = strPreBlankString.concat("for i in range(" + String.valueOf(intLoop) + "):");
+    	bw.write(strCommandLine);
+    	bw.newLine();
+    	
+    	strPreBlankString = "    ".concat(strPreBlankString);
+    	
+    	bw.write(strPreBlankString.concat("iColumn = 1"));
+    	bw.newLine();
+    	
+    	
+    	
+    	String imgHolder = (new File(strPythonPath)).getParent().concat("/");
+    	
+    	
+    	for (Map<String, String> map : operationDefinitionList) {
+    		
+			String strOperation = map.get("OPERATION_TYPE");
+			String strOperationValue = map.get("OPERATION_PIC_VALUE");
+			String strOperationPath = map.get("OPERATION_PIC_PATH");
+			String strOperationFile = map.get("OPERATION_PIC");
+			String strOperationCapture = map.get("OPERATION_CAPTURE");
+			String strOperationFixParent = map.get("OPERATION_PARENT");
+			
+			File strImgFile = new File(imgHolder.concat(strOperationFile));
+			
+			// if image not in the image holder, move it. 
+			if (!strImgFile.exists()) {
+				copyFile(strOperationPath, strImgFile.getAbsolutePath());
+			}
+			
+			// if the step is the input field, get the data from file
+			if (Utils.isTextOperation(strOperation)) {
+				bw.write(strPreBlankString.concat("strOperationData = sheet.row(intDataStartRow + i)[iColumn].value"));
+				bw.newLine();
+				strCommandLine = strPreBlankString.concat(strOperation).concat("(").concat(strOperationValue.replace("\"", "'").replace(strOperationPath, strOperationFile)).concat(", strOperationData)");
+				bw.write(strCommandLine);
+				bw.newLine();
+				
+				if (Boolean.valueOf(strOperationCapture)) {
+					bw.write(strPreBlankString.concat("captureNow()"));
+					bw.newLine();
+				}
+				
+				bw.write(strPreBlankString.concat("iColumn++"));
+				bw.newLine();
+			} else {
+				strCommandLine = strPreBlankString.concat(strOperation).concat("(").concat(strOperationValue.replace("\"", "'").replace(strOperationPath, strOperationFile)).concat(")");
+				bw.write(strCommandLine);
+				bw.newLine();
+				if (Boolean.valueOf(strOperationCapture)) {
+					bw.write(strPreBlankString.concat("captureNow()"));
+					bw.newLine();
+				}
+			}
+    	}
+    	
+    	return true;
+    }
+    
+    public static void main(String [] args) {
+    	try {
+			System.out.println(getOperationId("execute(\"opeid001\")"));
+		} catch (UserException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 }

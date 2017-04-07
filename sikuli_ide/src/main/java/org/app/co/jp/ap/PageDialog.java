@@ -215,7 +215,7 @@ public class PageDialog extends JDialog {
 			jPanel.add(getAddRecord(), null);
 			
 			JLabel titleFiledType = new JLabel();
-			titleFiledType.setText("Field ID");
+			titleFiledType.setText("Field Type");
 			titleFiledType.setHorizontalAlignment(SwingConstants.CENTER);
 			titleFiledType.setBounds(new Rectangle(10, 75, 90, 60));
 			titleFiledType.setBackground(new Color(255, 160, 204));

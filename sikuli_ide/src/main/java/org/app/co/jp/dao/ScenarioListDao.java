@@ -224,4 +224,43 @@ public class ScenarioListDao extends BaseDao{
 			}
 		}
 	}
+	
+	/**
+	 * 
+	 * 
+	 * @param strScenarioId
+	 * @return
+	 * @throws Exception
+	 */
+	public String getScenarioName(String strScenarioId) throws Exception {
+		String strResult = "";
+		
+		String strFilePath = scenarioDir.concat(SCENARIO_LIST_XML);
+		//
+		FileInputStream fisList = null;
+		try {
+			SAXReader reader = new SAXReader();
+
+			fisList = new FileInputStream(new File(strFilePath));
+			Document document = reader.read(fisList);
+			Element idElement = (Element)document.selectSingleNode("//scenarios/scenario[id='".concat(strScenarioId).concat("']/name"));
+			strResult = idElement.getText();
+		} catch(Exception e) {
+			logger.exception(e);
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (fisList != null) {
+				try {
+					fisList.close();
+				} catch (IOException e) {
+					logger.exception(e);
+					e.printStackTrace();
+					throw e;
+				}
+			}
+		}
+		
+		return strResult;
+	}
 }

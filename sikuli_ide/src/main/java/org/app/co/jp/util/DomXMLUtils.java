@@ -48,9 +48,10 @@ public class DomXMLUtils {
 //		MainApplet applet = new MainApplet();
 //		applet.setVisible(true);
 		
-		String strPath = "C:\\\\work\\\\worksoft\\\\eclipse\\\\workspace\\\\sikuli_ide\\\\excelApl\\\\scripts\\\\script_52\\\\script_52.sikuli\\\\script_copy.py";
+		String strPath = "C:\\\\Users\\\\shawn.shaohua.wang\\\\Desktop\\\\script\\\\";
+		String strPathPy = "C:\\\\Users\\\\shawn.shaohua.wang\\\\Desktop\\\\script\\\\script_57.py";
 		try {
-			Utils.addOuterDealPython(strPath);
+			Utils.addOuterDealPython(strPathPy, new String[]{strPath});
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

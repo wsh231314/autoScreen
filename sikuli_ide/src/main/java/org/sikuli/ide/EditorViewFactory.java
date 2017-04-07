@@ -210,7 +210,7 @@ class SyntaxHighlightLabelView extends LabelView {
             "addImagePath", "removeImagePath", "getImagePath", "addImportPath", "resetImagePath",
             "getParentPath", "makePath",
             //App class
-            "open", "close", "focus", "window", "focusedWindow", "captureNow",};
+            "open", "close", "focus", "window", "focusedWindow", "captureNow", "executeOperationId",};
     private static String[] constantsSikuli = {
             "FOREVER",
             "KEY_SHIFT", "KEY_CTRL", "KEY_META", "KEY_ALT", "KEY_CMD", "KEY_WIN",

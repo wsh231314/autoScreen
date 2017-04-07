@@ -105,20 +105,11 @@ public class CustomerImage extends JButton implements ActionListener, Serializab
     }
 
     public void setFilename(String fileName) {
-        _imgFilename = fileName;
-        if (Utils.isFileExists(fileName)) {
-        	
-			PageListDao dao = new PageListDao();
-			String path = dao.getPagePath("work");
-
-			_imgFilename = path.concat((new File(fileName)).getName());
-			
-			if (Utils.isFileExists(_imgFilename)) {
-				setIcon(new ImageIcon(createThumbnailImage(_imgFilename, 40)));
-			}
-        	
-        }
-        setButtonText();
+    	_imgFilename = fileName;
+    	if (Utils.isFileExists(fileName)) {
+    		setIcon(new ImageIcon(createThumbnailImage(_imgFilename, 40)));
+    	}
+    	setButtonText();
     }
 
     private BufferedImage createThumbnailImage(String imgFname, int maxHeight) {

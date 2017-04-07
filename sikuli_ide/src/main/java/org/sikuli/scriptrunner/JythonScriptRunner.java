@@ -169,18 +169,18 @@ public class JythonScriptRunner implements IScriptRunner {
         if (isFromIDE) {
             executeScriptHeader(new String[]{forIDE[0]});
             ScriptingSupport.setProject();
-            exitCode = runPython(pyFile, null, forIDE);
+            exitCode = runPython(pyFile, null, forIDE, argv);
             JythonHelper.get().removeSysPath(fScriptPath);
         } else {
             executeScriptHeader(new String[]{
                     pyFile.getParent(),
                     pyFile.getParentFile().getParent()});
-            exitCode = runPython(pyFile, null, new String[]{pyFile.getParentFile().getAbsolutePath()});
+            exitCode = runPython(pyFile, null, new String[]{pyFile.getParentFile().getAbsolutePath()}, argv);
         }
         return exitCode;
     }
 
-    private int runPython(File pyFile, String[] stmts, String[] scriptPaths) {
+    private int runPython(File pyFile, String[] stmts, String[] scriptPaths, String[] argv) {
         int exitCode = 0;
         String stmt = "";
         try {
@@ -201,12 +201,12 @@ public class JythonScriptRunner implements IScriptRunner {
                         interpreter.exec("sys.argv[0] = \"" + scr + "\"");
                     }
                     // TODO add additional step
-                    String pyPath = Utils.addOuterDealPython(pyFile.getAbsolutePath());
+                    String pyPath = Utils.addOuterDealPython(pyFile.getAbsolutePath(), argv);
                     
                     interpreter.execfile(pyPath);
                     
                     // TODO delete the temp file
-                    (new File(pyPath)).delete();
+//                    (new File(pyPath)).delete();
                     
                 }
             } else {

@@ -26,7 +26,7 @@ public class CommonConstant {
 	
 	public static final String DATA_TYPE_TIMESTAMP = "TIMESTAMP";
 	
-	public static final String OPTION_OPERATION = "find,wait,waitVanish,exists,click,doubleClick,rightClick,hover,type,paste";
+	public static final String OPTION_OPERATION = "find,wait,waitVanish,if exists,if not exists,while exists,while not exists,click,doubleClick,rightClick,hover,type,paste";
 	
 	public static final String OPTION_COMPONENT_TYPE = "Label,TextField,ComboBox,Button,CheckBox,RadioButton,ScrollBar";
 	

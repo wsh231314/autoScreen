@@ -47,6 +47,10 @@ public class ComDao extends BaseDao {
 	
 	private static final String SCENARIO_SEQ_FILE = "SCENARIO_SEQ.xml";
 	
+	private static final String OPERATION_SEQ_FILE = "OPERATION_SEQ.xml";
+	
+	private static final String OPERATION_DATA_SEQ_FILE = "OPERATION_DATA_SEQ.xml";
+	
 	BasicLogger logger = BasicLogger.getLogger();
 	
 	public ComDao() {
@@ -580,6 +584,112 @@ public class ComDao extends BaseDao {
 			fis = new FileInputStream(file);
 			Document document = reader.read(fis);
 			String strXPATH = "//".concat(strType);
+			util.preCheckAddDoc(document, "", strXPATH);
+			Node node = document.selectSingleNode(strXPATH);
+			//
+			String seq = node.getText();
+			if (seq == null || seq.trim().equals("")) {
+				strSeq = "1";
+			} else {
+				int iSeq = Integer.parseInt(seq.trim()) + 1;
+				strSeq = String.valueOf(iSeq);
+			}
+			node.setText(strSeq);
+			//
+			FileOutputStream out = new FileOutputStream(seqFilePath);
+			writer.setOutputStream(out);
+			writer.write(document);
+			out.close();
+		} catch (Exception e) {
+			logger.exception(e);
+			e.printStackTrace();
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					logger.exception(e);
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return strSeq;
+	}
+	
+	/**
+	 */
+	public String getOperationSeq(String strType) {
+		XMLUtils util = new XMLUtils();
+		XMLWriter writer = new XMLWriter();
+		// SEQ
+		String strSeq = "";
+		//
+		FileInputStream fis = null;
+		try {
+			SAXReader reader = new SAXReader();
+			String seqFilePath = seqDir.concat(OPERATION_SEQ_FILE);
+			File file = new File(seqFilePath);
+			if (!file.exists()) {
+				util.createBlankXml(seqFilePath, strType);
+			}
+			fis = new FileInputStream(file);
+			Document document = reader.read(fis);
+			String strXPATH = "//".concat(strType);
+			util.preCheckAddDoc(document, "", strXPATH);
+			Node node = document.selectSingleNode(strXPATH);
+			//
+			String seq = node.getText();
+			if (seq == null || seq.trim().equals("")) {
+				strSeq = "1";
+			} else {
+				int iSeq = Integer.parseInt(seq.trim()) + 1;
+				strSeq = String.valueOf(iSeq);
+			}
+			node.setText(strSeq);
+			//
+			FileOutputStream out = new FileOutputStream(seqFilePath);
+			writer.setOutputStream(out);
+			writer.write(document);
+			out.close();
+		} catch (Exception e) {
+			logger.exception(e);
+			e.printStackTrace();
+		} finally {
+			if (fis != null) {
+				try {
+					fis.close();
+				} catch (IOException e) {
+					logger.exception(e);
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return strSeq;
+	}
+	
+	/**
+	 *
+	 * @return SEQ
+	 */
+	public String getOperationDataSeq(String strOperationId, String strType) {
+		XMLUtils util = new XMLUtils();
+		XMLWriter writer = new XMLWriter();
+		// SEQ
+		String strSeq = "";
+		//
+		FileInputStream fis = null;
+		try {
+			SAXReader reader = new SAXReader();
+			String seqFilePath = seqDir.concat(OPERATION_DATA_SEQ_FILE);
+			File file = new File(seqFilePath);
+			if (!file.exists()) {
+				util.createBlankXml(seqFilePath, strType);
+			}
+			fis = new FileInputStream(file);
+			Document document = reader.read(fis);
+			String strXPATH = "//".concat(strType).concat("/").concat(strOperationId);
 			util.preCheckAddDoc(document, "", strXPATH);
 			Node node = document.selectSingleNode(strXPATH);
 			//

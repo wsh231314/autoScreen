@@ -81,7 +81,7 @@ public class MainApplet extends JFrame {
 			jLabel2.setBounds(new Rectangle(165, 140, 587, 20));
 			jLabel2.setText("Patten which can create data automatically");
 			jLabel3 = new JLabel();
-			jLabel3.setBounds(new Rectangle(165, 390, 396, 16));
+			jLabel3.setBounds(new Rectangle(165, 440, 396, 16));
 			jLabel3.setText("Import table's definitions");
 			jLabel1 = new JLabel();
 			jLabel1.setBounds(new java.awt.Rectangle(165,90,587,20));
@@ -131,6 +131,21 @@ public class MainApplet extends JFrame {
 			btnScriptList.setBounds(40, 240, 110, 30);
 			mainPanel.add(btnScriptList);
 			mainPanel.add(getBtnScenarioList());
+			
+			JButton btnOperationList = new JButton();
+			btnOperationList.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					Utils.addWindow(SikuliIDE.getMain());
+					OperationListDialog operationListDialog = new OperationListDialog();
+					Utils.addWindow(operationListDialog);
+					SikuliIDE.getMain().setVisible(false);
+					operationListDialog.setVisible(true);
+				}
+			});
+			btnOperationList.setText("Operation List");
+			btnOperationList.setBounds(new Rectangle(40, 340, 110, 30));
+			btnOperationList.setBounds(40, 390, 110, 30);
+			mainPanel.add(btnOperationList);
 		}
 		return mainPanel;
 	}
@@ -208,7 +223,7 @@ public class MainApplet extends JFrame {
 	private JButton getBtnTableInfoSet() {
 		if (btnTableInfoSet == null) {
 			btnTableInfoSet = new JButton();
-			btnTableInfoSet.setBounds(new Rectangle(40, 390, 110, 30));
+			btnTableInfoSet.setBounds(new Rectangle(40, 440, 110, 30));
 			btnTableInfoSet.setText("tables info");
 			btnTableInfoSet.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {

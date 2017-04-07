@@ -364,4 +364,53 @@ public class PageDao extends BaseDao{
 		
 		return arrResult;
 	}
+	
+	/**
+	 * 
+	 * 
+	 * @param strPageId
+	 * @param strFieldId
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, String> getFiledPropeties(String strPageId, String strFieldId) {
+		
+		XMLUtils utils = new XMLUtils();
+		Map<String, String> mapProperty = new HashMap<String, String>();
+		String strFilePath = pageDir.concat(strPageId).concat("\\\\").concat(PAGE_XML);
+		String strXPATH = "//fields/field[id='".concat(strFieldId).concat("']");
+		List<Element> commonList = utils.searchNode(strFilePath, strXPATH);
+		if (commonList != null && !commonList.isEmpty()) {
+			Element node = (Element)commonList.get(0);
+			
+			if (node.selectSingleNode("type") != null) {
+				String strType = node.selectSingleNode("type").getText();
+				mapProperty.put("type", strType);
+			}
+			
+			if (node.selectSingleNode("length") != null) {
+				String strLength = node.selectSingleNode("length").getText();
+				mapProperty.put("length", strLength);
+			}
+			
+			if (node.selectSingleNode("length") != null) {
+				String strLength = node.selectSingleNode("length").getText();
+				mapProperty.put("length", strLength);
+			}
+			
+			if (node.selectSingleNode("path") != null) {
+				String strLength = node.selectSingleNode("path").getText();
+				mapProperty.put("path", strLength);
+			}
+			
+			if (node.selectSingleNode("value") != null) {
+				String strLength = node.selectSingleNode("value").getText();
+				mapProperty.put("value", strLength);
+			}
+			
+		} else {
+			return null;
+		}
+		return mapProperty;
+	}
 }

@@ -52,7 +52,7 @@ public class ScenarioDialog extends JDialog {
 	
 	@SuppressWarnings("rawtypes")
 	private JComboBox operationInit;
-	private JCheckBox notUseInit;
+	private JCheckBox fixParentInit;
 	private JButton btnSortUpInit;
 	
 	private String strScenarioId = "";
@@ -62,6 +62,8 @@ public class ScenarioDialog extends JDialog {
 	private JButton btnSortDownInit;
 	private JButton btnDelInit;
 	private JButton btnConfirm;
+	private JLabel titleCapture;
+	private JCheckBox captureBtnInit;
 	
 	ScenarioListDialog _parent;
 	
@@ -103,7 +105,7 @@ public class ScenarioDialog extends JDialog {
 	 * 
 	 */
 	private void initialize() {
-        this.setSize(new Dimension(950, 600));
+        this.setSize(new Dimension(1010, 600));
         this.setContentPane(getJPanel());
 
         List<String> title = new ArrayList<String>();
@@ -114,7 +116,8 @@ public class ScenarioDialog extends JDialog {
         title.add("Field Name");
         title.add("Field Type");
         title.add("Operation");
-        title.add("Not Use");
+        title.add("Capture");
+        title.add("Fix parent");
         title.add("Sort Up");
         title.add("Sort Down");
         title.add("Del");
@@ -127,13 +130,14 @@ public class ScenarioDialog extends JDialog {
         componentList.add(fieldNameInit);
         componentList.add(fieldTypeInit);
         componentList.add(operationInit);
-        componentList.add(notUseInit);
+        componentList.add(captureBtnInit);
+        componentList.add(fixParentInit);
         componentList.add(btnSortUpInit);
         componentList.add(btnSortDownInit);
         componentList.add(btnDelInit);
         
-        String []arrColumn = {"STEP_ID", "PAGE_ID", "PAGE_NAME", "FIELD_ID", "FIELD_NAME", "FIELD_TYPE", "OPERATION", "NOT_USE", "DEAL_1", "DEAL_2", "DEAL_3"};
-        String []arrTitle = {"STEP_ID", "PAGE_ID", "PAGE_NAME", "FIELD_ID", "FIELD_NAME", "FIELD_TYPE", "OPERATION", "NOT_USE", "DEAL_1", "DEAL_3"};
+        String []arrColumn = {"STEP_ID", "PAGE_ID", "PAGE_NAME", "FIELD_ID", "FIELD_NAME", "FIELD_TYPE", "OPERATION", "CAPTURE", "FIX_PARENT", "DEAL_1", "DEAL_2", "DEAL_3"};
+        String []arrTitle = {"STEP_ID", "PAGE_ID", "PAGE_NAME", "FIELD_ID", "FIELD_NAME", "FIELD_TYPE", "OPERATION", "CAPTURE", "FIX_PARENT", "DEAL_1", "DEAL_3"};
         grid = new GridUtils(excelSheet, title, componentList, arrColumn, preButton, afterButton, 12, arrTitle);
         grid.setPageInfo(pageInfoLbl);
         
@@ -168,7 +172,7 @@ public class ScenarioDialog extends JDialog {
 			titleDeal.setText("Operation");
 			titleDeal.setBackground(new Color(255, 204, 204));
 			pageInfoLbl = new JLabel();
-			pageInfoLbl.setBounds(new Rectangle(274, 402, 315, 30));
+			pageInfoLbl.setBounds(new Rectangle(300, 402, 315, 30));
 			pageInfoLbl.setHorizontalAlignment(SwingConstants.CENTER);
 			pageInfoLbl.setText("JLabel");
 			titlePageName = new JLabel();
@@ -229,16 +233,24 @@ public class ScenarioDialog extends JDialog {
 			titleType.setBounds(520, 75, 70, 20);
 			jPanel.add(titleType);
 			
-			JLabel titleNotUse = new JLabel();
-			titleNotUse.setText("Not Use");
-			titleNotUse.setHorizontalAlignment(SwingConstants.CENTER);
-			titleNotUse.setBounds(new Rectangle(570, 75, 71, 20));
-			titleNotUse.setBackground(new Color(255, 204, 204));
-			titleNotUse.setBounds(693, 75, 60, 20);
-			jPanel.add(titleNotUse);
+			JLabel titleFixWithParent = new JLabel();
+			titleFixWithParent.setText("Fix Parent");
+			titleFixWithParent.setHorizontalAlignment(SwingConstants.CENTER);
+			titleFixWithParent.setBounds(new Rectangle(570, 75, 71, 20));
+			titleFixWithParent.setBackground(new Color(255, 204, 204));
+			titleFixWithParent.setBounds(753, 75, 60, 20);
+			jPanel.add(titleFixWithParent);
 			jPanel.add(getTitleSort());
 			jPanel.add(getTitleDelete());
 			jPanel.add(getBtnConfirm());
+			
+			titleCapture = new JLabel();
+			titleCapture.setText("Capture");
+			titleCapture.setHorizontalAlignment(SwingConstants.CENTER);
+			titleCapture.setBounds(new Rectangle(570, 75, 71, 20));
+			titleCapture.setBackground(new Color(255, 204, 204));
+			titleCapture.setBounds(693, 75, 60, 20);
+			jPanel.add(titleCapture);
 		}
 		return jPanel;
 	}
@@ -258,7 +270,7 @@ public class ScenarioDialog extends JDialog {
 			stepIdInit.setBounds(new Rectangle(3, 0, 70, 20));
 			stepIdInit.setText("JLabel");
 			excelSheet = new JPanel();
-			excelSheet.setBounds(new Rectangle(10, 95, 920, 300));
+			excelSheet.setBounds(new Rectangle(10, 95, 980, 300));
 			excelSheet.setLayout(null);
 			excelSheet.add(stepIdInit, null);
 			excelSheet.add(pageIdInit, null);
@@ -271,10 +283,10 @@ public class ScenarioDialog extends JDialog {
 			operationInit.setBounds(583, 0, 100, 20);
 			excelSheet.add(operationInit);
 			
-			notUseInit = new JCheckBox("");
-			notUseInit.setHorizontalAlignment(SwingConstants.CENTER);
-			notUseInit.setBounds(693, 0, 30, 20);
-			excelSheet.add(notUseInit);
+			fixParentInit = new JCheckBox("");
+			fixParentInit.setHorizontalAlignment(SwingConstants.CENTER);
+			fixParentInit.setBounds(747, 0, 36, 20);
+			excelSheet.add(fixParentInit);
 			
 			btnSortUpInit = new JButton();
 			btnSortUpInit.addActionListener(new ActionListener() {
@@ -283,7 +295,7 @@ public class ScenarioDialog extends JDialog {
 					int iRow = 0;
 					List compList = grid.getComponentList();
 					for (int i = 0; i < compList.size(); i++) {
-						if (e.getSource().equals(((List)compList.get(i)).get(8))) {
+						if (e.getSource().equals(((List)compList.get(i)).get(9))) {
 							iRow = i;
 						}
 					}
@@ -310,10 +322,15 @@ public class ScenarioDialog extends JDialog {
 			btnSortUpInit.setPreferredSize(new Dimension(70, 30));
 			btnSortUpInit.setFont(new Font("Dialog", Font.BOLD, 10));
 			btnSortUpInit.setBounds(new Rectangle(557, 0, 70, 20));
-			btnSortUpInit.setBounds(740, 0, 50, 20);
+			btnSortUpInit.setBounds(807, 0, 50, 20);
 			excelSheet.add(btnSortUpInit);
 			excelSheet.add(getBtnSortDownInit());
 			excelSheet.add(getBtnDelInit());
+			
+			captureBtnInit = new JCheckBox("");
+			captureBtnInit.setHorizontalAlignment(SwingConstants.CENTER);
+			captureBtnInit.setBounds(691, 0, 30, 20);
+			excelSheet.add(captureBtnInit);
 		}
 		return excelSheet;
 	}
@@ -328,7 +345,7 @@ public class ScenarioDialog extends JDialog {
 			jButton = new JButton();
 			jButton.setText("Close");
 			jButton.setSize(new Dimension(90,30));
-			jButton.setLocation(new Point(840, 500));
+			jButton.setLocation(new Point(900, 500));
 			jButton.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					setVisible(false);
@@ -376,7 +393,7 @@ public class ScenarioDialog extends JDialog {
 	private JButton getAfterButton() {
 		if (afterButton == null) {
 			afterButton = new JButton();
-			afterButton.setLocation(new Point(840, 403));
+			afterButton.setLocation(new Point(900, 403));
 			afterButton.setText("Next Page");
 			afterButton.setSize(new Dimension(90,30));
 		}
@@ -404,7 +421,7 @@ public class ScenarioDialog extends JDialog {
 	private JButton getAddPageField() {
 		if (addPageField == null) {
 			addPageField = new JButton();
-			addPageField.setBounds(new Rectangle(820, 40, 110, 20));
+			addPageField.setBounds(new Rectangle(880, 40, 110, 20));
 			addPageField.setText("Add Page Field");
 			addPageField.setPreferredSize(new Dimension(70, 30));
 			addPageField.addActionListener(new java.awt.event.ActionListener() {
@@ -441,7 +458,7 @@ public class ScenarioDialog extends JDialog {
 			titleSort.setHorizontalAlignment(SwingConstants.CENTER);
 			titleSort.setBounds(new Rectangle(570, 75, 71, 20));
 			titleSort.setBackground(new Color(255, 204, 204));
-			titleSort.setBounds(730, 75, 120, 20);
+			titleSort.setBounds(814, 75, 120, 20);
 		}
 		return titleSort;
 	}
@@ -488,7 +505,7 @@ public class ScenarioDialog extends JDialog {
 			titleDelete.setHorizontalAlignment(SwingConstants.CENTER);
 			titleDelete.setBounds(new Rectangle(570, 75, 71, 20));
 			titleDelete.setBackground(new Color(255, 204, 204));
-			titleDelete.setBounds(865, 75, 60, 20);
+			titleDelete.setBounds(925, 75, 60, 20);
 		}
 		return titleDelete;
 	}
@@ -501,7 +518,7 @@ public class ScenarioDialog extends JDialog {
 					int iRow = 0;
 					List compList = grid.getComponentList();
 					for (int i = 0; i < compList.size(); i++) {
-						if (e.getSource().equals(((List)compList.get(i)).get(9))) {
+						if (e.getSource().equals(((List)compList.get(i)).get(10))) {
 							iRow = i;
 						}
 					}
@@ -527,7 +544,7 @@ public class ScenarioDialog extends JDialog {
 			btnSortDownInit.setPreferredSize(new Dimension(70, 30));
 			btnSortDownInit.setFont(new Font("Dialog", Font.BOLD, 10));
 			btnSortDownInit.setBounds(new Rectangle(557, 0, 70, 20));
-			btnSortDownInit.setBounds(790, 0, 50, 20);
+			btnSortDownInit.setBounds(860, 0, 50, 20);
 		}
 		return btnSortDownInit;
 	}
@@ -544,7 +561,7 @@ public class ScenarioDialog extends JDialog {
 					int iRow = 0;
 					List compList = grid.getComponentList();
 					for (int i = 0; i < compList.size(); i++) {
-						if (e.getSource().equals(((List)compList.get(i)).get(10))) {
+						if (e.getSource().equals(((List)compList.get(i)).get(11))) {
 							iRow = i;
 						}
 					}
@@ -565,7 +582,7 @@ public class ScenarioDialog extends JDialog {
 			btnDelInit.setPreferredSize(new Dimension(70, 30));
 			btnDelInit.setFont(new Font("Dialog", Font.BOLD, 11));
 			btnDelInit.setBounds(new Rectangle(557, 0, 70, 20));
-			btnDelInit.setBounds(855, 0, 55, 20);
+			btnDelInit.setBounds(915, 0, 55, 20);
 		}
 		return btnDelInit;
 	}
@@ -632,7 +649,8 @@ public class ScenarioDialog extends JDialog {
 			item.put("FIELD_NAME", map.get("FIELD_NAME"));
 			item.put("FIELD_TYPE", map.get("FIELD_TYPE"));
 			item.put("OPERATION", "");
-			item.put("NOT_USE", "false");
+			item.put("CAPTURE", "false");
+			item.put("FIX_PARENT", "false");
 			item.put("DEAL_1", CommonConstant.SORT_UP);
 			item.put("DEAL_2", CommonConstant.SORT_DOWN);
 			item.put("DEAL_3", "Del");

@@ -51,7 +51,8 @@ public class ScenarioDao extends BaseDao{
 				String strPageId = node.selectSingleNode("page_id").getText();
 				String strFieldId = node.selectSingleNode("field_id").getText();
 				String strOperation = node.selectSingleNode("operation").getText();
-				String strNotUse = node.selectSingleNode("not_use").getText();
+				String strCapture = node.selectSingleNode("capture").getText();
+				String strFixParent = node.selectSingleNode("fix_parent").getText();
 				String strButton1 = CommonConstant.SORT_UP;
 				String strButton2 = CommonConstant.SORT_DOWN;
 				String strButton3 = "Del";
@@ -74,7 +75,8 @@ public class ScenarioDao extends BaseDao{
 				map.put("FIELD_NAME", strFiledName);
 				map.put("FIELD_TYPE", strFiledType);
 				map.put("OPERATION", strOperation);
-				map.put("NOT_USE", strNotUse);
+				map.put("CAPTURE", strCapture);
+				map.put("FIX_PARENT", strFixParent);
 				map.put("DEAL_1", strButton1);
 				map.put("DEAL_2", strButton2);
 				map.put("DEAL_3", strButton3);
@@ -241,7 +243,9 @@ public class ScenarioDao extends BaseDao{
 				String strPageId = (String)map.get("PAGE_ID");
 				String strFieldId = (String)map.get("FIELD_ID");
 				String strOperation = (String)map.get("OPERATION");
-				String strNotUse = (String)map.get("NOT_USE");
+				String strCapture = (String)map.get("CAPTURE");
+				String strFixParent = (String)map.get("FIX_PARENT");
+				
 				
 				util.preCheckAddDoc(document, "", "//steps");
 				Element rootNode = (Element)document.selectSingleNode("//steps");
@@ -250,7 +254,8 @@ public class ScenarioDao extends BaseDao{
 				rootTableList.addElement("page_id").setText(strPageId);
 				rootTableList.addElement("field_id").setText(strFieldId);
 				rootTableList.addElement("operation").setText(strOperation);
-				rootTableList.addElement("not_use").setText(strNotUse);
+				rootTableList.addElement("capture").setText(strCapture);
+				rootTableList.addElement("fix_parent").setText(strFixParent);
 				
 			}
 			FileOutputStream out = new FileOutputStream(strFilePath);
@@ -281,5 +286,45 @@ public class ScenarioDao extends BaseDao{
 				}
 			}
 		}
+	}
+	
+	
+	/**
+	 * 
+	 * 
+	 * @param strScenarioId
+	 * @return
+	 * @throws Exception
+	 */
+	public String getScenarioOperationType(String strScenarioId, String strStepId) throws Exception {
+		String strResult = "";
+		
+		String strFilePath = scenarioDir.concat(strScenarioId).concat("\\\\").concat(SCENARIO_XML);
+		//
+		FileInputStream fisList = null;
+		try {
+			SAXReader reader = new SAXReader();
+
+			fisList = new FileInputStream(new File(strFilePath));
+			Document document = reader.read(fisList);
+			Element idElement = (Element)document.selectSingleNode("//steps/step[id='".concat(strStepId).concat("']/operation"));
+			strResult = idElement.getText();
+		} catch(Exception e) {
+			logger.exception(e);
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (fisList != null) {
+				try {
+					fisList.close();
+				} catch (IOException e) {
+					logger.exception(e);
+					e.printStackTrace();
+					throw e;
+				}
+			}
+		}
+		
+		return strResult;
 	}
 }
