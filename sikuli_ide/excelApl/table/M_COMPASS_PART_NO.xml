@@ -1,2 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<table><column key="false"><name>PROTECT_NO</name><type>VARCHAR2</type><length>4</length><precision></precision><scale></scale><nullable>N</nullable></column><column key="false"><name>PART_NO</name><type>VARCHAR2</type><length>18</length><precision></precision><scale></scale><nullable>Y</nullable></column></table>
